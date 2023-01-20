@@ -22,6 +22,8 @@ import { GetOneShadeResponseDto } from './dto/get-one-shade.response.dto';
 import { PaginateFilterDto } from './dto/paginate-filter.dto';
 import { PaginateQueryDto } from './dto/paginate.query.dto';
 import { PaginateResponseDto } from './dto/paginate.response.dto';
+import { SililarQueryDto } from './dto/similar.query.dto';
+import ShadeModel from './model/shade.model';
 import { ShadeService } from './shade.service';
 
 @ApiTags('Shades flow')
@@ -39,6 +41,19 @@ export class ShadeController {
     @Param('id', IdValidationPipe) id: string,
   ): Promise<GetOneShadeResponseDto> {
     return await this.shadeService.getOneById(id);
+  }
+
+  @ApiOperation({ summary: 'Get all shades with pagination' })
+  @ApiCreatedResponse({
+    description: 'Get all shades with pagination',
+    type: [ShadeModel],
+  })
+  @Get('similar/:shadeId')
+  async getSimilar(
+    @Param('shadeId', IdValidationPipe) shadeId: string,
+    @Query() similarQueryDto: SililarQueryDto,
+  ): Promise<ShadeModel[]> {
+    return await this.shadeService.getSimilar(shadeId, similarQueryDto);
   }
 
   @ApiOperation({ summary: 'Get all shades with pagination' })

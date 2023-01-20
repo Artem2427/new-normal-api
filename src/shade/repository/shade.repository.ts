@@ -27,6 +27,10 @@ export class ShadeRepository {
     return await this.shadeRepository.findOne({ where: { hex } });
   }
 
+  async findAllByColorId(colorId: string) {
+    return await this.shadeRepository.findAll({ where: { colorId } });
+  }
+
   async create(createShadeDto: CreateShadeDto) {
     return await this.shadeRepository.create(createShadeDto);
   }

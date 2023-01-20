@@ -4,12 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DefaultResponseDto } from 'src/shared/dto/default.response';
+import { getColors, outputColors } from 'src/shared/utils/color-sort';
 import { CreateShadeDto } from './dto/create-shade.dto';
 import { GetOneShadeResponseDto } from './dto/get-one-shade.response.dto';
 import { PaginateFilterDto } from './dto/paginate-filter.dto';
 import { PaginateQueryDto } from './dto/paginate.query.dto';
 import { PaginateResponseDto } from './dto/paginate.response.dto';
+import { SililarQueryDto } from './dto/similar.query.dto';
 import { NOT_FOUND_SHADE, SHADE_ALREADY_EXISTS } from './errors/errors';
+import ShadeModel from './model/shade.model';
 import { ShadeRepository } from './repository/shade.repository';
 import { IPaginateParams } from './types/paginate-params.interface';
 
@@ -42,6 +45,31 @@ export class ShadeService {
       searchTerm: paginateParams.searchTerm,
       colorIds: paginateFilterDto.colorIds,
     });
+  }
+
+  async getSimilar(
+    shadeId: string,
+    similarQueryDto: SililarQueryDto,
+  ): Promise<ShadeModel[]> {
+    const shades = await this.shadeRepository.findAllByColorId(
+      similarQueryDto.colorId,
+    );
+
+    const currentShade = await this.shadeRepository.findOneById(shadeId);
+
+    const sortedShades = outputColors(shades.map((shade) => shade.hex));
+
+    const indexCurrentShade = sortedShades.findIndex(
+      (hex) => hex === currentShade.hex,
+    );
+
+    const result = getColors(
+      sortedShades,
+      indexCurrentShade,
+      similarQueryDto.count,
+    ).map((hex) => shades.find((shade) => shade.hex === hex));
+
+    return result;
   }
 
   async create(createShadeDto: CreateShadeDto): Promise<DefaultResponseDto> {
